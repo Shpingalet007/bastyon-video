@@ -132,6 +132,19 @@ const videosAddResumableValidator = [
     return next()
   }
 ]
+const containerAddResumableValidator = [
+  async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    /**
+     * This is videosAddResumableValidator() clone adapted to
+     * validate ZIP archive with transcoded versions of the video
+     *
+     * TODO [6d32f8e]:
+     *  - Check that the ZIP contains only allowed transcoded resolutions
+     *  - Check that the ZIP contains all mandatory resolutions
+     *  - While developing this function, use videosAddResumableValidator() as reference
+     */
+  }
+]
 
 /**
  * File is created in POST initialisation, and its body is saved as a 'metadata' field is saved by uploadx for later use.
@@ -193,6 +206,7 @@ const videosAddResumableInitValidator = getCommonVideoEditAttributes().concat([
     return next()
   }
 ])
+const containerAddResumableInitValidator = videosAddResumableInitValidator;
 
 const videosUpdateValidator = getCommonVideoEditAttributes().concat([
   isValidVideoIdParam('id'),
@@ -498,6 +512,8 @@ export {
   videosAddLegacyValidator,
   videosAddResumableValidator,
   videosAddResumableInitValidator,
+  containerAddResumableInitValidator,
+  containerAddResumableValidator,
 
   videosUpdateValidator,
   videosGetValidator,

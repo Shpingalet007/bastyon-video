@@ -40,7 +40,9 @@ import {
   authenticate,
   videosAddLegacyValidator,
   videosAddResumableInitValidator,
-  videosAddResumableValidator
+  videosAddResumableValidator,
+  containerAddResumableInitValidator,
+  containerAddResumableValidator,
 } from '../../../middlewares'
 import { ScheduleVideoUpdateModel } from '../../../models/video/schedule-video-update'
 import { VideoModel } from '../../../models/video/video'
@@ -70,6 +72,8 @@ const reqVideoFileAddResumable = createReqFiles(
   }
 )
 
+const reqContainerFileAddResumable = reqVideoFileAddResumable;
+
 uploadRouter.post('/upload',
   openapiOperationDoc({ operationId: 'uploadLegacy' }),
   authenticate,
@@ -97,6 +101,28 @@ uploadRouter.put('/upload-resumable',
   uploadxMiddleware, // uploadx doesn't use call next() before the file upload completes
   asyncMiddleware(videosAddResumableValidator),
   asyncMiddleware(addVideoResumable)
+)
+
+uploadRouter.post('/upload-transcoded',
+  openapiOperationDoc({ operationId: 'uploadResumable' }),
+  authenticate,
+  reqContainerFileAddResumable,
+  asyncMiddleware(containerAddResumableInitValidator),
+  uploadxMiddleware
+)
+
+uploadRouter.delete('/upload-transcoded',
+  authenticate,
+  uploadxMiddleware
+)
+
+uploadRouter.put('/upload-transcoded',
+  openapiOperationDoc({ operationId: 'uploadResumable' }),
+  authenticate,
+  uploadxMiddleware,
+  // TODO [6d32f8e]: containerUnzipOnReceived,
+  asyncMiddleware(containerAddResumableValidator),
+  asyncMiddleware(addContainerResumable)
 )
 
 // ---------------------------------------------------------------------------
@@ -129,6 +155,20 @@ export async function addVideoResumable (_req: express.Request, res: express.Res
   const videoPhysicalFile = res.locals.videoFileResumable
   const videoInfo = videoPhysicalFile.metadata
   const files = { previewfile: videoInfo.previewfile }
+
+  return addVideo({ res, videoPhysicalFile, videoInfo, files })
+}
+
+export async function addContainerResumable (_req: express.Request, res: express.Response) {
+  const videoPhysicalFile = res.locals.videoFileResumable
+  const videoInfo = videoPhysicalFile.metadata
+  const files = { previewfile: videoInfo.previewfile }
+
+  /**
+   * TODO [6d32f8e]:
+   *  - While developing this function, use addVideoResumable as reference
+   *  - Looks like addVideo() receives the source video file while we have the transcoded ones
+   */
 
   return addVideo({ res, videoPhysicalFile, videoInfo, files })
 }
