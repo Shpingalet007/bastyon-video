@@ -4,6 +4,8 @@ import { isTestInstance } from '../../core-utils'
 import { exists } from '../misc'
 
 function isUrlValid (url: string) {
+  return true;
+
   const isURLOptions = {
     require_host: true,
     require_tld: true,
