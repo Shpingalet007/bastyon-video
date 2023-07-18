@@ -41,7 +41,7 @@
     "dev:embed": "bash ./scripts/dev/embed.sh",
     "dev:client": "bash ./scripts/dev/client.sh",
     "dev:cli": "bash ./scripts/dev/cli.sh",
-    "start": "node dist/server",
+    "start": "node --inspect-brk=9229 dist/server",
     "start:server": "node dist/server --no-client",
     "update-host": "node ./dist/scripts/update-host.js",
     "create-transcoding-job": "node ./dist/scripts/create-transcoding-job.js",
