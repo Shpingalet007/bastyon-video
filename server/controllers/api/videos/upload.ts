@@ -49,7 +49,14 @@ import { VideoFileModel } from '../../../models/video/video-file'
 const lTags = loggerTagsFactory('api', 'video')
 const auditLogger = auditLoggerFactory('videos')
 const uploadRouter = express.Router()
-const uploadxMiddleware = uploadx.upload({ directory: getResumableUploadPath() })
+
+const uploadxMiddleware = uploadx.upload({
+  directory: getResumableUploadPath(),
+  allowMIME: [
+    'video/*',
+    'application/zip'
+  ]
+})
 
 const reqVideoFileAdd = createReqFiles(
   [ 'videofile', 'thumbnailfile', 'previewfile' ],
