@@ -32,7 +32,8 @@ const handlers: { [ id in VideoTranscodingPayload['type'] ]: HandlerFunction } =
   'new-resolution-to-hls': handleHLSJob,
   'new-resolution-to-webtorrent': handleNewWebTorrentResolutionJob,
   'merge-audio-to-webtorrent': handleWebTorrentMergeAudioJob,
-  'optimize-to-webtorrent': handleWebTorrentOptimizeJob
+  'optimize-to-webtorrent': handleWebTorrentOptimizeJob,
+  'load-resolutions-container': loadResolutionsContainer
 }
 
 const lTags = loggerTagsFactory('transcoding')
@@ -123,6 +124,11 @@ async function handleWebTorrentOptimizeJob (job: Job, payload: OptimizeTranscodi
   logger.info('Optimize transcoding job for %s ended.', video.uuid, lTags(video.uuid))
 
   await retryTransactionWrapper(onVideoFileOptimizer, video, payload, transcodeType, user)
+}
+
+async function loadResolutionsContainer (job: Job, payload: OptimizeTranscodingPayload, video: MVideoFullLight, user: MUserId) {
+  logger.info('Handling container upload for %s.', video.uuid, lTags(video.uuid))
+  await console.log('')
 }
 
 // ---------------------------------------------------------------------------

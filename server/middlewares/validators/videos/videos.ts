@@ -56,6 +56,8 @@ import {
   isValidVideoIdParam
 } from '../shared'
 
+import type { PeertubeVideoUploadFile } from "@server/controllers/api/videos/upload";
+
 const videosAddLegacyValidator = getCommonVideoEditAttributes().concat([
   body('videofile')
     .custom((value, { req }) => isFileFieldValid(req.files, 'videofile'))
@@ -74,7 +76,7 @@ const videosAddLegacyValidator = getCommonVideoEditAttributes().concat([
 
     if (areValidationErrors(req, res)) return cleanUpReqFiles(req)
 
-    const videoFile: express.VideoUploadFile = req.files['videofile'][0]
+    const videoFile: PeertubeVideoUploadFile = req.files['videofile'][0]
     const user = res.locals.oauth.token.User
 
     if (!await commonVideoChecksPass({ req, res, user, videoFileSize: videoFile.size, files: req.files })) {
@@ -107,7 +109,17 @@ const videosAddResumableValidator = [
     const user = res.locals.oauth.token.User
 
     const body: express.CustomUploadXFile<express.UploadXFileMetadata> = req.body
-    const file = { ...body, duration: undefined, path: getResumableUploadPath(body.id), filename: body.metadata.filename }
+
+    const contentType = req.headers['X-Upload-Content-Type']
+    const isVideoContainer = (contentType === 'application/zip')
+
+    const file = {
+      ...body,
+      duration: undefined,
+      path: getResumableUploadPath(body.id),
+      filename: body.metadata.filename,
+      isContainer: isVideoContainer
+    }
 
     const cleanup = () => deleteFileAndCatch(file.path)
 
@@ -601,8 +613,15 @@ export async function isVideoAccepted (
   return true
 }
 
-async function addDurationToVideo (videoFile: { path: string, duration?: number }) {
-  const duration: number = await getDurationFromVideoFile(videoFile.path)
+async function addDurationToVideo (videoFile: PeertubeVideoUploadFile) {
+  let videoPath = videoFile.path
+
+  if (videoFile.isContainer) {
+    // TODO: Calculate name of video-0
+    videoPath += '/video720.mp4'
+  }
+
+  const duration = await getDurationFromVideoFile(videoPath)
 
   if (isNaN(duration)) throw new Error(`Couldn't get video duration`)
 

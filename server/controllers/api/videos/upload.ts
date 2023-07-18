@@ -125,8 +125,10 @@ export async function addVideoLegacy (req: express.Request, res: express.Respons
   return addVideo({ res, videoPhysicalFile, videoInfo, files })
 }
 
+export type PeertubeVideoUploadFile = express.EnhancedUploadXFile & { isContainer: boolean }
+
 export async function addVideoResumable (_req: express.Request, res: express.Response) {
-  const videoPhysicalFile = res.locals.videoFileResumable
+  const videoPhysicalFile = res.locals.videoFileResumable as PeertubeVideoUploadFile
   const videoInfo = videoPhysicalFile.metadata
   const files = { previewfile: videoInfo.previewfile }
 
@@ -135,7 +137,7 @@ export async function addVideoResumable (_req: express.Request, res: express.Res
 
 async function addVideo (options: {
   res: express.Response
-  videoPhysicalFile: express.VideoUploadFile
+  videoPhysicalFile: PeertubeVideoUploadFile
   videoInfo: VideoCreate
   files: express.UploadFiles
 }) {
@@ -143,8 +145,15 @@ async function addVideo (options: {
   const videoChannel = res.locals.videoChannel
   const user = res.locals.oauth.token.User
 
+  let videoPath = videoPhysicalFile.path
+
+  if (videoPhysicalFile.isContainer) {
+    // TODO: Rewrite videoPath with path to the video-0 in container
+    videoPath = `${videoPhysicalFile.path}/video720.mp4`
+  }
+
   // video aspect ratio
-  const videoResolutionInfo = await getVideoFileResolution(videoPhysicalFile.path)
+  const videoResolutionInfo = await getVideoFileResolution(videoPath)
 
   const MAX_IMAGE_SIZE = 640 * 640
 

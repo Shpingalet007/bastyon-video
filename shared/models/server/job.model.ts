@@ -124,11 +124,16 @@ export interface OptimizeTranscodingPayload extends BaseTranscodingPayload {
   type: 'optimize-to-webtorrent'
 }
 
+export interface LoadResolutionsContainerPayload extends BaseTranscodingPayload {
+  type: 'load-resolutions-container'
+}
+
 export type VideoTranscodingPayload =
   HLSTranscodingPayload
   | NewResolutionTranscodingPayload
   | OptimizeTranscodingPayload
   | MergeAudioTranscodingPayload
+  | LoadResolutionsContainerPayload
 
 export interface VideoLiveEndingPayload {
   videoId: number
