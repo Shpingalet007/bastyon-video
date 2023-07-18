@@ -470,6 +470,13 @@ const MIMETYPES = {
     },
     EXT_MIMETYPE: null as { [ id: string ]: string }
   },
+  MEDIA_CONTAINER: {
+    MIMETYPE_EXT: {
+      'application/zip': '.zip'
+    },
+    MIMETYPES_REGEX: null as string,
+    EXT_MIMETYPE: null as { [ id: string ]: string }
+  },
   VIDEO: {
     MIMETYPE_EXT: null as { [ id: string ]: string | string[] },
     MIMETYPES_REGEX: null as string,

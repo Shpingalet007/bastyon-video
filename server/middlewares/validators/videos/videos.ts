@@ -25,6 +25,7 @@ import {
   isVideoCategoryValid,
   isVideoDescriptionValid,
   isVideoFileMimeTypeValid,
+  isContainerMimeTypeValid,
   isVideoFileSizeValid,
   isVideoFilterValid,
   isVideoImage,
@@ -554,7 +555,7 @@ async function commonVideoChecksPass (parameters: {
 
   if (!await doesVideoChannelOfAccountExist(req.body.channelId, user, res)) return false
 
-  if (!isVideoFileMimeTypeValid(files)) {
+  if (!isVideoFileMimeTypeValid(files) && !isContainerMimeTypeValid(files)) {
     res.fail({
       status: HttpStatusCode.UNSUPPORTED_MEDIA_TYPE_415,
       message: 'This file is not supported. Please, make sure it is of the following type: ' +
