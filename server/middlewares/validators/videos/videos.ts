@@ -35,7 +35,8 @@ import {
   isVideoOriginallyPublishedAtValid,
   isVideoPrivacyValid,
   isVideoSupportValid,
-  isVideoTagsValid
+  isVideoTagsValid,
+  isContainerMime
 } from '../../../helpers/custom-validators/videos'
 import { cleanUpReqFiles } from '../../../helpers/express-utils'
 import { getDurationFromVideoFile } from '../../../helpers/ffprobe-utils'
@@ -56,6 +57,9 @@ import {
   doesVideoFileOfVideoExist,
   isValidVideoIdParam
 } from '../shared'
+
+import * as decompress from 'decompress'
+import fs from 'fs'
 
 import type { PeertubeVideoUploadFile } from "@server/controllers/api/videos/upload";
 
@@ -111,8 +115,8 @@ const videosAddResumableValidator = [
 
     const body: express.CustomUploadXFile<express.UploadXFileMetadata> = req.body
 
-    const contentType = req.headers['X-Upload-Content-Type']
-    const isVideoContainer = (contentType === 'application/zip')
+    const contentType = req.headers['content-type']
+    const isVideoContainer = isContainerMime(contentType)
 
     const file = {
       ...body,
@@ -120,6 +124,20 @@ const videosAddResumableValidator = [
       path: getResumableUploadPath(body.id),
       filename: body.metadata.filename,
       isContainer: isVideoContainer
+    }
+
+    if (isVideoContainer) {
+      const extractedPath = `${file.path}_unzip`
+
+      decompress(file.path, extractedPath).then((files) => {
+        console.log('Unzip done!', files)
+      })
+
+      fs.unlink(file.path, () => {
+        console.log('Original file removed')
+      })
+
+      file.path = extractedPath
     }
 
     const cleanup = () => deleteFileAndCatch(file.path)

@@ -90,6 +90,11 @@ function isContainerMimeTypeValid (files: UploadFilesForCheck) {
   return isFileMimeTypeValid(files, MIMETYPES.MEDIA_CONTAINER.MIMETYPES_REGEX, 'videofile')
 }
 
+function isContainerMime (contentType: string) {
+  const mediaContainerRegex = new RegExp(`^${MIMETYPES.MEDIA_CONTAINER.MIMETYPES_REGEX}$`, 'i')
+  return mediaContainerRegex.test(contentType)
+}
+
 const videoImageTypes = CONSTRAINTS_FIELDS.VIDEOS.IMAGE.EXTNAME
                                           .map(v => v.replace('.', ''))
                                           .join('|')
@@ -155,6 +160,7 @@ export {
   isVideoFileExtnameValid,
   isVideoFileMimeTypeValid,
   isContainerMimeTypeValid,
+  isContainerMime,
   isVideoDurationValid,
   isVideoTagValid,
   isVideoPrivacyValid,

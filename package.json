@@ -89,6 +89,7 @@
     "cors": "^2.8.1",
     "create-torrent": "^5.0.0",
     "decache": "^4.6.0",
+    "decompress": "^4.2.1",
     "deep-object-diff": "^1.1.0",
     "email-templates": "^8.0.3",
     "express": "^4.12.4",
