@@ -58,10 +58,13 @@ import {
   isValidVideoIdParam
 } from '../shared'
 
-import * as decompress from 'decompress'
+// eslint-disable-next-line import/no-named-default
+import { default as decompress } from 'decompress'
 import fs from 'fs'
+import path from 'path'
 
-import type { PeertubeVideoUploadFile } from "@server/controllers/api/videos/upload";
+import type { PeertubeVideoUploadFile } from '@server/controllers/api/videos/upload'
+import { parseHlsFolder } from '@server/lib/parsehls'
 
 const videosAddLegacyValidator = getCommonVideoEditAttributes().concat([
   body('videofile')
@@ -129,9 +132,9 @@ const videosAddResumableValidator = [
     if (isVideoContainer) {
       const extractedPath = `${file.path}_unzip`
 
-      decompress(file.path, extractedPath).then((files) => {
-        console.log('Unzip done!', files)
-      })
+      const extractedFiles = await decompress(file.path, extractedPath)
+
+      console.log('Unzip done!', extractedFiles)
 
       fs.unlink(file.path, () => {
         console.log('Original file removed')
@@ -636,8 +639,16 @@ async function addDurationToVideo (videoFile: PeertubeVideoUploadFile) {
   let videoPath = videoFile.path
 
   if (videoFile.isContainer) {
-    // TODO: Calculate name of video-0
-    videoPath += '/video720.mp4'
+    const videos = parseHlsFolder(videoPath)
+    const sortedResolutions = Object.keys(videos).sort((a, b) => {
+      const numA = Number.parseFloat(a)
+      const numB = Number.parseFloat(b)
+
+      return numA - numB
+    })
+    const maxRes = sortedResolutions[0]
+
+    videoPath += path.resolve(videoFile.path, videos[maxRes].file)
   }
 
   const duration = await getDurationFromVideoFile(videoPath)
