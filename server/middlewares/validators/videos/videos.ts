@@ -653,6 +653,10 @@ export async function isVideoAccepted (
 async function addDurationToVideo (videoFile: PeertubeVideoUploadFile) {
   let videoPath = videoFile.path
 
+  if (videoFile.isContainer) {
+    videoPath = videoFile.containerData.protoFile
+  }
+
   const duration = await getDurationFromVideoFile(videoPath)
 
   if (isNaN(duration)) throw new Error(`Couldn't get video duration`)
