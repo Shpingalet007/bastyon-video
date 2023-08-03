@@ -24,7 +24,7 @@ function parsePlaylists (hlsFolder, resolutionPlaylists) {
   const resolutionFragments = {}
 
   Object.keys(resolutionPlaylists).forEach((res, i) => {
-    const playlist = fs.readFileSync(resolutionPlaylists[res])
+    const playlist = fs.readFileSync(path.resolve(hlsFolder, resolutionPlaylists[res]))
 
     const rawFragments = playlist.toString().match(ByteRangeRegexGlobal)
     const fragments = rawFragments.map(f => f.match(ByteRangeRegex))

@@ -127,7 +127,7 @@ const videosAddResumableValidator = [
       path: getResumableUploadPath(body.id),
       filename: body.metadata.filename,
       isContainer: isVideoContainer
-    }
+    } as PeertubeVideoUploadFile
 
     if (isVideoContainer) {
       const extractedPath = `${file.path}_unzip`
@@ -141,6 +141,21 @@ const videosAddResumableValidator = [
       })
 
       file.path = extractedPath
+
+      const videos = parseHlsFolder(file.path)
+      const sortedResolutions = Object.keys(videos).sort((a, b) => {
+        const numA = Number.parseFloat(a)
+        const numB = Number.parseFloat(b)
+
+        return numB - numA
+      })
+
+      const maxRes = sortedResolutions[0]
+
+      file.containerData = {
+        protoFile: path.resolve(file.path, videos[maxRes].file),
+        meta: videos
+      }
     }
 
     const cleanup = () => deleteFileAndCatch(file.path)
@@ -637,19 +652,6 @@ export async function isVideoAccepted (
 
 async function addDurationToVideo (videoFile: PeertubeVideoUploadFile) {
   let videoPath = videoFile.path
-
-  if (videoFile.isContainer) {
-    const videos = parseHlsFolder(videoPath)
-    const sortedResolutions = Object.keys(videos).sort((a, b) => {
-      const numA = Number.parseFloat(a)
-      const numB = Number.parseFloat(b)
-
-      return numA - numB
-    })
-    const maxRes = sortedResolutions[0]
-
-    videoPath += path.resolve(videoFile.path, videos[maxRes].file)
-  }
 
   const duration = await getDurationFromVideoFile(videoPath)
 

@@ -132,7 +132,13 @@ export async function addVideoLegacy (req: express.Request, res: express.Respons
   return addVideo({ res, videoPhysicalFile, videoInfo, files })
 }
 
-export type PeertubeVideoUploadFile = express.EnhancedUploadXFile & { isContainer: boolean }
+export type PeertubeVideoUploadFile = express.EnhancedUploadXFile & {
+  isContainer: boolean
+  containerData?: {
+    protoFile: string
+    meta: object
+  }
+}
 
 export async function addVideoResumable (_req: express.Request, res: express.Response) {
   const videoPhysicalFile = res.locals.videoFileResumable as PeertubeVideoUploadFile
@@ -155,8 +161,7 @@ async function addVideo (options: {
   let videoPath = videoPhysicalFile.path
 
   if (videoPhysicalFile.isContainer) {
-    // TODO: Rewrite videoPath with path to the video-0 in container
-    videoPath = `${videoPhysicalFile.path}/video720.mp4`
+    videoPath = videoPhysicalFile.containerData.protoFile
   }
 
   // video aspect ratio
