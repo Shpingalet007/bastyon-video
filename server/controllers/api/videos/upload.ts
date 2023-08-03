@@ -272,19 +272,25 @@ async function addVideo (options: {
   })
 }
 
-async function buildNewFile (videoPhysicalFile: express.VideoUploadFile) {
+async function buildNewFile (videoPhysicalFile: PeertubeVideoUploadFile) {
+  let videoFilePath = videoPhysicalFile.path
+
+  if (videoPhysicalFile.isContainer) {
+    videoFilePath = videoPhysicalFile.containerData.protoFile
+  }
+
   const videoFile = new VideoFileModel({
     extname: getLowercaseExtension(videoPhysicalFile.filename),
     size: videoPhysicalFile.size,
     videoStreamingPlaylistId: null,
-    metadata: await getMetadataFromFile(videoPhysicalFile.path)
+    metadata: await getMetadataFromFile(videoFilePath)
   })
 
   if (videoFile.isAudio()) {
     videoFile.resolution = DEFAULT_AUDIO_RESOLUTION
   } else {
-    videoFile.fps = await getVideoFileFPS(videoPhysicalFile.path)
-    videoFile.resolution = (await getVideoFileResolution(videoPhysicalFile.path)).resolution
+    videoFile.fps = await getVideoFileFPS(videoFilePath)
+    videoFile.resolution = (await getVideoFileResolution(videoFilePath)).resolution
   }
 
   videoFile.filename = generateWebTorrentVideoFilename(videoFile.resolution, videoFile.extname)
